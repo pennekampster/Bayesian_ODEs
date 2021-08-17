@@ -16,8 +16,9 @@ getData <- function(D, temp = 20) {
     N_series = nrow(D),
     time_end = as.matrix(D["Incubation_time"]), # expects array[N_series, 1]
     x_start = cbind(round(D$Prey_start_density), round(D$Predator_start_density)), # expects array[N_series] vector[2]
-    x_end = cbind(round(D$Prey_end_density), round(D$Predator_end_density)) # ??? Original code seems to: D$Prey_start_density - D$Prey_end_density, which leads to negative numbers
+    x_end = cbind(round(D$Prey_end_density), round(D$Predator_end_density)) # ??? Original code seems to subtract two times: D$Prey_start_density - (D$Prey_start_density - D$Prey_end_density), which leads to negative numbers
   )
+  return(data)
 }
 
 
