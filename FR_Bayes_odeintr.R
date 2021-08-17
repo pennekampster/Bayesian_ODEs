@@ -59,7 +59,7 @@ prior <- createUniformPrior(lower = refPars$lower,
                             upper = refPars$upper, 
                             best = refPars$best)
 bayesianSetup <- createBayesianSetup(nll.odeint.general, prior=prior, names=c("b", "h", "q"))
-iter = 1000
+iter = 10000
 settings = list(iterations = iter, message = F)
 
 out <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
