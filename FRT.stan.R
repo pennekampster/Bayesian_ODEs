@@ -1,7 +1,9 @@
 # Library -----------------------------------------------------------------
 library(tidyverse)
 library(cmdstanr)
+library(here)
 ## make sure to:
+# remotes::install_github("stan-dev/cmdstanr")
 # cmdstanr::install_cmdstan()
 
 
