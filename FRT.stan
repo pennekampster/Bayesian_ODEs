@@ -60,7 +60,7 @@ transformed parameters {
 
 model {
   // Priors
-  b_log ~ normal(-4.106669, 2);
+  b_log ~ normal(-4.106669, 1);
   c_log ~ normal(-5.600194, 2);
   h_log ~ normal(-3.531813, 2);
   K_log ~ normal(7.901859, 2);

@@ -44,4 +44,5 @@ includepars <- c("b_log", "c_log","h_log", "K_log", "q", "r_log")
 draws_25 <- fit_25$draws()
 bayesplot::mcmc_trace(draws_25, pars = includepars)
 bayesplot::mcmc_areas(draws_25, area_method = "equal height", pars = includepars)
+bayesplot::mcmc_pairs(draws_25, pars = includepars)
 
