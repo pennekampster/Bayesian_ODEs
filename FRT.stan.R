@@ -3,6 +3,12 @@ library(tidyverse)
 library(here)
 library(cmdstanr)
 library(here)
+
+library(posterior)
+library(bayesplot)
+color_scheme_set("brightblue")
+
+
 ## make sure to:
 # remotes::install_github("stan-dev/cmdstanr")
 # cmdstanr::install_cmdstan()
@@ -40,7 +46,6 @@ fit_25 <- model$sample(data = getData(D, temp = 25),
 # Explore fit ----------------------------------------------------------
 
 fit_25$summary()
-
 includepars <- c("b_log", "c_log","h_log", "K_log", "q", "r_log")
 draws_25 <- fit_25$draws()
 bayesplot::mcmc_trace(draws_25, pars = includepars)

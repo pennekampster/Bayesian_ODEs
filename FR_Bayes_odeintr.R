@@ -59,7 +59,7 @@ prior <- createUniformPrior(lower = refPars$lower,
                             upper = refPars$upper, 
                             best = refPars$best)
 bayesianSetup <- createBayesianSetup(nll.odeint.general, prior=prior, names=c("b", "h", "q"))
-iter = 1000
+iter = 10000
 settings = list(iterations = iter, message = F)
 
 out <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
@@ -71,6 +71,8 @@ marginalPlot(out)
 correlationPlot(out)
 gelmanDiagnostics(out) # should be below 1.05 for all parameters to demonstrate convergence 
 
+summary(fit.gen)
+summary(out)
 
 
 

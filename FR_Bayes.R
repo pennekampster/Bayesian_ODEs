@@ -2,7 +2,7 @@ library(BayesianTools)
 library("deSolve")
 library("bbmle")
 library("emdbook")
-
+library(here)
 
 #------------------------------------------------------------------------------
 # data 1: Vuciv-Pestic et al.
@@ -13,6 +13,7 @@ n = nrow(df)
 str(df)
 Tt <- rep(1,nrow(df))
 P <- rep(1,nrow(df))
+plot(df)
 
 eq.ode.general = function(t, x, parms){
   with(as.list(parms),{
@@ -97,7 +98,7 @@ prior <- createUniformPrior(lower = refPars$lower,
                             best = refPars$best)
 bayesianSetup <- createBayesianSetup(nll.ode.general2, prior=prior, names=c("b", "h", "q"))
 iter = 1000
-settings = list(iterations = iter, message = F)
+settings = list(iterations = iter, message = T)
 
 out <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
 
@@ -109,8 +110,8 @@ correlationPlot(out)
 gelmanDiagnostics(out) # should be below 1.05 for all parameters to demonstrate convergence 
 
 
-
-
+summary(fit.gen)
+summary(out)
 
 
 
