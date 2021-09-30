@@ -26,6 +26,7 @@ library(readr)
 library(bbmle)
 library(here)
 library(odeintr)
+#devtools::install_github(repo = "florianhartig/BayesianTools", subdir = "BayesianTools", dependencies = T, build_vignettes = T)
 library(BayesianTools)
 
 ############## DATA
@@ -72,7 +73,7 @@ prior <- createUniformPrior(lower = refPars$lower,
                             best = refPars$best)
 
 bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
-iter = 100000
+iter = 1000
 settings <- list(iterations = iter, nrChains = 3,  message = FALSE)
 out <- runMCMC(bayesianSetup = bayesianSetup, sampler = "DEzs", settings = settings)
 
