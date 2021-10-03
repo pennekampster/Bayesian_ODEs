@@ -65,20 +65,33 @@ eaten.odeint.general.pred = function(N0, b, h, q, r, K, c, Tt, P, steps=100){
 
 
 nll.odeint.general.pred = function(parms, 
-                                   Ndead=(FRT_Dataset_15$Prey_start_density - FRT_Dataset_15$Prey_end_density), 
-                                   N0=FRT_Dataset_15$Prey_start_density, 
-                                   Tt=FRT_Dataset_15$Incubation_time, 
-                                   P=FRT_Dataset_15$Predator_start_density, 
-                                   P.end=FRT_Dataset_15$Predator_start_density, 
+                                   Ndead=(FRT_Dataset$Prey_start_density - FRT_Dataset$Prey_end_density), 
+                                   N0=FRT_Dataset$Prey_start_density, 
+                                   Tt=FRT_Dataset$Incubation_time, 
+                                   P=FRT_Dataset$Predator_start_density, 
+                                   P.end=FRT_Dataset$Predator_start_density, 
                                    steps=100){
   #if(sigma <= 0) return(Inf)
+  # temp2 = eaten.odeint.general.pred(N0=N0,
+  #                                   b=exp(parms[1]),
+  #                                   h=exp(parms[2]),
+  #                                   q=parms[3],
+  #                                   r=exp(parms[4]),
+  #                                   K=exp(parms[5]),
+  #                                   c=exp(parms[6]),
+  #                                   Tt=Tt,
+  #                                   P=P,
+  #                                   steps=steps)
+  
+  
+  
   temp2 = eaten.odeint.general.pred(N0=N0,
                                     b=exp(parms[1]),
                                     h=parms[2],
                                     q=parms[3],
                                     r=parms[4],
                                     K=exp(parms[5]),
-                                    c=exp(parms[6]),
+                                    c=parms[6],
                                     Tt=Tt,
                                     P=P,
                                     steps=steps)

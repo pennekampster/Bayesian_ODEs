@@ -35,43 +35,33 @@ FRT_Dataset_15 <- filter(FRT_Dataset, Temperature==15)
 FRT_Dataset_20 <- filter(FRT_Dataset, Temperature==20)
 FRT_Dataset_25 <- filter(FRT_Dataset, Temperature==25)
 
+
+
 ############## FUNCTIONS
 source("FRT_function.R")
 
 ############## FITTING
 
 # | TEMPERATURE  15°C |
+FRT_Dataset <- FRT_Dataset_15
+# refPars <- data.frame(best=c(-4.106669, -3.531813,  0.867401, -0.994875, 7.901859, -5.600194,  0.222916), 
+#                       lower = c(-20, -10, -0.99,  -10, 1,    -10, 0),
+#                       upper = c(5, 1,     3,   1, 10,    10, 1),
+#                       row.names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
 
-fit.15 = mle2(minuslogl = nll.odeint.general.pred,
-              start = list(b.log = -4.106669,
-                           h = exp(-3.531813),
-                           q = 0.867401,
-                           r = exp(-0.994875),
-                           K.log = 7.901859,
-                           c = exp(-5.600194),
-                           sigma = 0.222916),
-              data = with(list(N0 = Prey_start_density,
-                               Ndead = Prey_start_density - Prey_end_density,
-                               P = Predator_start_density,
-                               P.end = Predator_end_density,
-                               Tt = Incubation_time),
-                          data = FRT_Dataset_15))
-summary(fit.15)
-
-
-source("FRT_function_Bayes.R")
-
-refPars <- data.frame(#best=c(-4.106669, exp(-3.531813), 0.867401, exp(-0.994875), 7.901859, exp(-5.600194), 0.222916), 
-  best = coef(summary(fit.15))["Estimate"],                    
-  lower = c(-10, 0, -0.99, 0, 1, 0, 0),
-                      upper = c(-1, 0.1, 3, 1, 10, 0.1, 0.3),
-                      row.names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
+refPars <- data.frame(best=c(-4.106669, exp(-3.531813), 0.867401, exp(-0.994875), 7.901859, -5.600194, 0.222916), 
+                       lower = c(-10, 0, -0.99, 0, 1, 0, 0),
+                       upper = c(1, 0.1, 3, 1, 10, 0.1, 0.3),
+                       row.names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
 
 
 prior <- createUniformPrior(lower = refPars$lower, 
                             upper = refPars$upper, 
                             best = refPars$best)
 
+#prior <- createTruncatedNormalPrior(refPars$best, rep(2,7), refPars$lower, refPars$upper)
+
+#bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
 bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
 iter = 1000
 settings <- list(iterations = iter, nrChains = 3,  message = FALSE)
@@ -81,13 +71,29 @@ out <- runMCMC(bayesianSetup = bayesianSetup, sampler = "DEzs", settings = setti
 settings <- list(iterations = iter, adapt = T, DRlevels = 2, gibbsProbabilities = NULL, temperingFunction = NULL, optimize = T,  message = FALSE)
 out <- runMCMC(bayesianSetup = bayesianSetup, sampler = "Metropolis", settings = settings)
 
-## Not run: 
-plot(out)
-summary(out)
-marginalPlot(out)
-correlationPlot(out)
-gelmanDiagnostics(out) # should be below 1.05 for all parameters to demonstrate convergence 
+# create prior from successful previous run
+newPrior = createPriorDensity(out, method = "multivariate",
+                              eps = 1e-10, lower = refPars$lower,
+                              upper = refPars$upper, best = refPars$best)
 
+#bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
+bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=newPrior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
+iter = 10000
+settings = list(iterations = iter, message = F)
+
+out_15 <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
+
+## Not run: 
+plot(out_15)
+summary(out_15)
+#marginalPlot(out_15)
+correlationPlot(out_15)
+gelmanDiagnostics(out_15) # should be below 1.05 for all parameters to demonstrate convergence 
+
+
+# | TEMPERATURE  20°C |
+
+FRT_Dataset <- FRT_Dataset_20
 
 # Re-starting DE sampler when chains are stuck
 
@@ -107,42 +113,97 @@ out <- runMCMC(bayesianSetup = bayesianSetup,  sampler = "DEzs", settings = sett
 plot(out)
 
 
+# refPars <- data.frame(best=c(-15.229665, -3.100683,  1.250667, 0.136438, 7.897008, -4.554020,  0.236063), 
+#                       lower = c(-20, -10, -0.99,  -10, 1,    -10, 0),
+#                       upper = c(5, 1,     3,   1, 10,    10, 1),
+#                       row.names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
+
+ refPars <- data.frame(best=c(-15.229665, exp(-3.100683),  log(3.492671), exp(0.136438), 7.897008, exp(-4.554020),  0.236063), 
+                       lower = c(-10, 0, -0.99, 0, 1, 0, 0),
+                       upper = c(1, 0.1, 3, 1, 10, 0.1, 0.3),
+                       row.names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
 
 
+prior <- createUniformPrior(lower = refPars$lower, 
+                            upper = refPars$upper, 
+                            best = refPars$best)
 
-# | TEMPERATURE  20°C |
+#bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
+bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
+iter = 1000
+settings = list(iterations = iter, message = F)
 
-fit.20 = mle2(minuslogl = nll.odeint.general.pred,
-              start = list(b.log = -15.229665,
-                           h = exp(-3.100683), 
-                           q = 3.492671, 
-                           r = exp(0.136438),
-                           K.log = 7.897008, 
-                           c = exp(-4.554020), 
-                           sigma = 0.236063),
-              data = with(list(N0 = Prey_start_density,
-                               Ndead = Prey_start_density - Prey_end_density,
-                               P = Predator_start_density,
-                               P.end = Predator_end_density,
-                               Tt = Incubation_time),
-                          data = FRT_Dataset_20))
-summary(fit.20)
+out <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
+
+# create prior from successful previous run
+newPrior = createPriorDensity(out, method = "multivariate",
+                              eps = 1e-10, lower = refPars$lower,
+                              upper = refPars$upper, best = refPars$best)
+
+#bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
+bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=newPrior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
+iter = 10000
+settings = list(iterations = iter, message = F)
+
+out_20 <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
+
+
+## Not run: 
+plot(out_20)
+summary(out_20)
+#marginalPlot(out_20)
+correlationPlot(out_20)
+gelmanDiagnostics(out_20) # should be below 1.05 for all parameters to demonstrate convergence 
 
 
 # | TEMPERATURE  25°C |
 
-fit.25 = mle2(minuslogl = nll.odeint.general.pred,
-              start = list(b.log = 1.116512, 
-                           h = exp(-6.987074),
-                           q=-0.569485,
-                           r = exp(0.189600),
-                           K.log = 8.476514,
-                           c = exp(-4.580168),
-                           sigma = 0.422386),
-              data = with(list(N0 = Prey_start_density,
-                               Ndead = Prey_start_density - Prey_end_density,
-                               P = Predator_start_density,
-                               P.end = Predator_end_density,
-                               Tt = Incubation_time),
-                          data = FRT_Dataset_25))
-summary(fit.25)
+
+FRT_Dataset <- FRT_Dataset_25
+
+# refPars <- data.frame(best=c(1, -6.987074,  0.86740, -1.662839, 8.476514, -4.580168,  0.42), 
+#                       lower = c(-20, -10, -0.99,  -10, 1,    -10, 0),
+#                       upper = c(5, 1,     3,   1,     10,    10, 1),
+#                       row.names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
+
+refPars <- data.frame(best=c(1.116512, exp(-6.987074),  -0.569485, exp(0.189600), 8.476514, exp(-4.580168),  0.422386), 
+                      lower = c(-10, 0, -0.99, 0, 1, 0, 0),
+                      upper = c(1, 0.1, 3, 1, 10, 0.1, 0.3),
+                       row.names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
+
+prior <- createUniformPrior(lower = refPars$lower, 
+                            upper = refPars$upper, 
+                            best = refPars$best)
+
+#bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
+bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
+iter = 1000
+settings = list(iterations = iter, message = F)
+
+out <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
+
+# create prior from successful previous run
+newPrior = createPriorDensity(out, method = "multivariate",
+                              eps = 1e-10, lower = refPars$lower,
+                              upper = refPars$upper, best = refPars$best)
+
+#bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
+bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=newPrior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
+iter = 10000
+settings = list(iterations = iter, message = F)
+
+out_25 <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
+
+## Not run: 
+plot(out_25)
+summary(out_25)
+#marginalPlot(out_25)
+correlationPlot(out_25)
+gelmanDiagnostics(out_25) # should be below 1.05 for all parameters to demonstrate convergence 
+
+medians15 <- getSample(out_15) %>% as.data.frame %>% summarize_all(median)
+medians20 <- getSample(out_20) %>% as.data.frame %>% summarize_all(median)
+medians25 <- getSample(out_25) %>% as.data.frame %>% summarize_all(median)
+
+rbind(medians15, medians20, medians25) %>% mutate_at(vars(contains("log")), exp)
+

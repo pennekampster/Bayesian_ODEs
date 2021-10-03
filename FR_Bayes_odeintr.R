@@ -71,6 +71,8 @@ marginalPlot(out)
 correlationPlot(out)
 gelmanDiagnostics(out) # should be below 1.05 for all parameters to demonstrate convergence 
 
+summary(fit.gen)
+summary(out)
 
 
 
