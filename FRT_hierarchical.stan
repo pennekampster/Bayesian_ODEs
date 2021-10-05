@@ -10,7 +10,7 @@ functions {
     dx_dt[1] = -b * pow(x[1], 1+q) / (1 + b * h * pow(x[1], 1+q)) * x[2] + r * x[1] * (1.0 - x[1]/K);
     // Predators:
     dx_dt[2] = x[2] * c * b * pow(x[1], 1+q) / (1 + b * h * pow(x[1], 1+q));
-    
+
     return dx_dt;
   }
 
@@ -19,6 +19,8 @@ functions {
 data {
   
   int<lower=0> N_series;
+  array[N_series] int<lower=0> rep_temp;
+
   array[N_series, 1] real time_end;
   array[N_series, 2] int x_start;
   array[N_series] vector[2] x_start_vector;
@@ -29,12 +31,23 @@ data {
 parameters {
   
   //// ODE parameters
-  real b_log;
+  real b_log; // grand mean parameter
+  // vector[3] b_log_temp_raw; // contrasts for the temperature levels
+  // real<lower=0> sigma_b; // standard deviation of the parameters
+  
   real c_log;
   real h_log;
-  real K_log;
+  
+  
+  real K_log; // grand mean parameter
+  vector[3] K_log_temp_raw; // contrasts for the temperature levels
+  real<lower=0> sigma_K; // standard deviation of the parameters
+  
+  
   real q;
   real r_log;
+  
+  
   
   // array[N_series] vector[2] x_hat_start_log;
   
@@ -45,6 +58,8 @@ transformed parameters {
   array[N_series, 1] vector<lower=0>[2] x_hat_end;
     // ode integrator expects an array[N_data,N_times] vector[N_states]. This is why some arrays have the superficial indices here: array[N_series, 1]
   
+  vector[3] K_log_temp = K_log + sigma_K * K_log_temp_raw; // implies: K_log_temp ~ normal(b_log, sigma_K)
+  
   for(s in 1:N_series) {
       
       //// Version with latent initinal state
@@ -52,30 +67,33 @@ transformed parameters {
       //                 exp(b_log), exp(c_log), exp(h_log), exp(K_log), q, exp(r_log));
       
       x_hat_end[s,] = ode_rk45(x_t, x_start_vector[s,], 0.0, time_end[s,],
-                      exp(b_log), exp(c_log), exp(h_log), exp(K_log), q, exp(r_log));
-                      
+                      exp(b_log), exp(c_log), exp(h_log), exp(K_log_temp[rep_temp[s]]), q, exp(r_log));
   }
 }
 
 
 model {
   // Priors
-  b_log ~ normal(1.117, 2); // b_log ~ normal(-4.106669, 1);
-  c_log ~ normal(-4.60517, 2);
-  h_log ~ normal(-6.907755, 2);
-  K_log ~ normal(8.477, 2);
-  q ~ normal(-.56, 2);
-  r_log ~ normal(0.1897936, 2);
+  b_log ~ normal(1.117, 1); // b_log ~ normal(-4.106669, 1);
+  c_log ~ normal(-4.60517, 1);
+  h_log ~ normal(-6.907755, 1);
+  K_log ~ normal(8.477, 1);
+  q ~ normal(-.56, 1);
+  r_log ~ normal(0.1897936, 1);
+  
+  sigma_K ~ std_normal();
   
   // sigma ~ normal(0, 1);
   
-
   //// Statistical model
   for(s in 1:N_series) {
     
     //// Version with latent initinal state: Fitiing the unknown true initial state to the data,
     // x_start[s,] ~ poisson_log(x_hat_start_log[s]);
+
+    K_log_temp_raw ~ std_normal(); // implies: b_log_temp ~ normal(b_log, sd_b);
     
+    //// Fitiing the final state from the ODE to the data.
     //// Fitiing the final state from the ODE to the data.
     if(x_start[s, 2] == 0) {
         x_end[s,1] ~ poisson(x_hat_end[s, 1, 1]); // index 1 is there to accomodate for data structure array[N_data,N_times] vector[N_states]

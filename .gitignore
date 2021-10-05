@@ -42,3 +42,4 @@ vignettes/*.pdf
 # Stan files
 Draws/*
 FRT
+FRT_hierarchical
