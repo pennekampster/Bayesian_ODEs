@@ -36,16 +36,16 @@ fit <- model$sample(data = getData(D, temp = NA),
                        init = replicate(n_chains, list(b_log = -4.106669, c_log = -5.600194, h_log = -3.531813, K_log = 7.901859, q = 0.867401, r_log = -0.994875), simplify = F), # sigma = 0.222916
                        iter_warmup = 300, iter_sampling = 500, chains = n_chains, parallel_chains = n_chains, output_dir = "Draws", output_basename = "fit_25", seed = 1)
 
-# fit_25$save_output_files(dir = "Draws", basename = "fit_25")
-# fit_25 <- cmdstanr::read_cmdstan_csv(fit_25$output_files())
+# fit$save_output_files(dir = "Draws", basename = "fit_25")
+# fit <- cmdstanr::read_cmdstan_csv(fit_25$output_files())
 
 # Explore fit ----------------------------------------------------------
 
-fit_25$summary()
+fit$summary()
 
 includepars <- c("b_log", "c_log","h_log", "K_log", "K_log_temp", "q", "r_log")
-draws_25 <- fit_25$draws()
-bayesplot::mcmc_trace(draws_25, pars = includepars)
-bayesplot::mcmc_areas(draws_25, area_method = "equal height", pars = includepars)
-bayesplot::mcmc_pairs(draws_25, pars = includepars)
+draws <- fit$draws()
+bayesplot::mcmc_trace(draws, pars = includepars)
+bayesplot::mcmc_areas(draws, area_method = "equal height", pars = includepars)
+bayesplot::mcmc_pairs(draws, pars = includepars)
 
