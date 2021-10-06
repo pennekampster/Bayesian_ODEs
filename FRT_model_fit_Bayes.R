@@ -38,7 +38,7 @@ FRT_Dataset_25 <- filter(FRT_Dataset, Temperature==25)
 
 
 ############## FUNCTIONS
-source("FRT_function.R")
+source("FRT_function_Bayes.R")
 
 ############## FITTING
 
@@ -59,6 +59,9 @@ prior <- createUniformPrior(lower = refPars$lower,
                             upper = refPars$upper, 
                             best = refPars$best)
 
+x = prior$sampler()
+nll.odeint.general.pred(x)
+
 #prior <- createTruncatedNormalPrior(refPars$best, rep(2,7), refPars$lower, refPars$upper)
 
 #bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
@@ -77,7 +80,7 @@ newPrior = createPriorDensity(out, method = "multivariate",
                               upper = refPars$upper, best = refPars$best)
 
 #bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
-bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=newPrior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
+bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
 iter = 10000
 settings = list(iterations = iter, message = F)
 
@@ -86,7 +89,7 @@ out_15 <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
 ## Not run: 
 plot(out_15)
 summary(out_15)
-#marginalPlot(out_15)
+marginalPlot(out_15)
 correlationPlot(out_15)
 gelmanDiagnostics(out_15) # should be below 1.05 for all parameters to demonstrate convergence 
 
@@ -99,7 +102,7 @@ FRT_Dataset <- FRT_Dataset_20
 
 # OK, the idea is to re-start the first sampler with a better guess of where the final posterior area is. 
 
-x = getSample(out, start = 1000)
+x = getSample(out, start = 100)
 # because of the low sample size, I don't trust the correlations, will thus only look at means and the range, and use this as new values for the sampler
 
 meansPost = apply(x, 2, mean)
@@ -141,7 +144,7 @@ newPrior = createPriorDensity(out, method = "multivariate",
                               upper = refPars$upper, best = refPars$best)
 
 #bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
-bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=newPrior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
+bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
 iter = 10000
 settings = list(iterations = iter, message = F)
 
@@ -161,23 +164,27 @@ gelmanDiagnostics(out_20) # should be below 1.05 for all parameters to demonstra
 
 FRT_Dataset <- FRT_Dataset_25
 
-# refPars <- data.frame(best=c(1, -6.987074,  0.86740, -1.662839, 8.476514, -4.580168,  0.42), 
-#                       lower = c(-20, -10, -0.99,  -10, 1,    -10, 0),
-#                       upper = c(5, 1,     3,   1,     10,    10, 1),
-#                       row.names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
+ # refPars <- data.frame(best=c(1, -6.987074,  0.86740, -1.662839, 8.476514, -4.580168,  0.42), 
+ #                       lower = c(-20, -10, -0.99,  -10, 1,    -10, 0),
+ #                       upper = c(5, 1,     3,   1,     10,    10, 1),
+ #                       row.names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
 
-refPars <- data.frame(best=c(1.116512, exp(-6.987074),  -0.569485, exp(0.189600), 8.476514, exp(-4.580168),  0.422386), 
-                      lower = c(-10, 0, -0.99, 0, 1, 0, 0),
-                      upper = c(1, 0.1, 3, 1, 10, 0.1, 0.3),
+refPars <- data.frame(best=c(1.116512, exp(-6.987074),  -0.569485, exp(0.189600), 8.476514, exp(-4.580168),  0.422386),
+                      lower = c(1.115, 0, -0.99, 0, 1, 0, 0),
+                      upper = c(1.117, 0.1, 3, 1, 10, 0.1, 0.3),
                        row.names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
 
 prior <- createUniformPrior(lower = refPars$lower, 
                             upper = refPars$upper, 
                             best = refPars$best)
 
+#prior <- createTruncatedNormalPrior(mean=c(1.116512, exp(-6.987074),  -0.569485, exp(0.189600), 8.476514, exp(-4.580168),  0.422386),
+#                                     sd=rep(2,7))
+
+
 #bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
 bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
-iter = 1000
+iter = 10000
 settings = list(iterations = iter, message = F)
 
 out <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
@@ -188,7 +195,7 @@ newPrior = createPriorDensity(out, method = "multivariate",
                               upper = refPars$upper, best = refPars$best)
 
 #bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
-bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=newPrior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
+bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
 iter = 10000
 settings = list(iterations = iter, message = F)
 
