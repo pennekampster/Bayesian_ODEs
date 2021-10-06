@@ -35,10 +35,8 @@ parameters {
   vector[3] b_log_temp_raw; // contrasts for the temperature levels
   real<lower=0> sigma_b; // standard deviation of the parameters
   
-  real c_log;
   vector[3] c_log_temp_raw;
-  real<lower=0> sigma_c;
-  
+
   real h_log;
   vector[3] h_log_temp_raw;
   real<lower=0> sigma_h;
@@ -65,7 +63,7 @@ transformed parameters {
     // ode integrator expects an array[N_data,N_times] vector[N_states]. This is why some arrays have the superficial indices here: array[N_series, 1]
   
   vector[3] b_log_temp = b_log + sigma_b * b_log_temp_raw; // implies: b_log_temp ~ normal(b_log, sigma_v)
-  vector[3] c_log_temp = c_log + sigma_c * c_log_temp_raw;
+  // vector[3] c_log_temp = c_log + sigma_c * c_log_temp_raw;
   vector[3] h_log_temp = h_log + sigma_h * h_log_temp_raw;
   vector[3] K_log_temp = K_log + sigma_K * K_log_temp_raw;
   vector[3] q_temp = q + sigma_q * q_temp_raw;
@@ -87,7 +85,7 @@ transformed parameters {
 model {
   // Priors
   b_log ~ normal(1.117, 1); // b_log ~ normal(-4.106669, 1);
-  c_log ~ normal(-4.60517, 1);
+  // c_log ~ normal(-4.60517, 1);
   h_log ~ normal(-6.907755, 1);
   K_log ~ normal(8.477, 1);
   q ~ normal(-.56, 1);
@@ -101,7 +99,7 @@ model {
   sigma_r ~ std_normal();
   
   b_log_temp_raw ~ std_normal();
-  c_log_temp_raw ~ std_normal();
+  // c_log_temp_raw ~ std_normal();
   h_log_temp_raw ~ std_normal();
   K_log_temp_raw ~ std_normal();
   q_temp_raw ~ std_normal();
