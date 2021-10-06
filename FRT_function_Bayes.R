@@ -96,8 +96,15 @@ nll.odeint.general.pred = function(parms,
                                     P=P,
                                     steps=steps)
   
+  
+  
+  
   y = temp2[[1]]
   z = temp2[[2]]
+  
+  y[!is.finite(y)] <- 0
+  z[!is.finite(z)] <- 0
+  
   
   ll = sum(dnorm(x = log(N0-Ndead),
                      mean = log(N0-y),
