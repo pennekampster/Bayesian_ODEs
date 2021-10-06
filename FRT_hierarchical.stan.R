@@ -34,10 +34,18 @@ n_chains <- 3
 # if(!dir.exists("Draws")) dir.create("Draws")
 fit <- model$sample(data = getData(D, temp = NULL),
                        init = replicate(n_chains, list(b_log = -4.106669, c_log = -5.600194, h_log = -3.531813, K_log = 7.901859, q = 0.867401, r_log = -0.994875), simplify = F), # sigma = 0.222916
-                       iter_warmup = 300, iter_sampling = 500, chains = n_chains, parallel_chains = n_chains, output_dir = "Draws", output_basename = "fit_25", seed = 1)
+                       iter_warmup = 300, iter_sampling = 500, chains = n_chains, parallel_chains = n_chains, output_dir = "Draws", output_basename = "fit__across_temp", seed = 1)
 
-# fit$save_output_files(dir = "Draws", basename = "fit_25")
-# fit <- cmdstanr::read_cmdstan_csv(fit_25$output_files())
+# fit$save_output_files(dir = "Draws", basename = "fit_across_temp")
+fit <- cmdstanr::read_cmdstan_csv(dir_ls("Draws/", regex="across"))
+
+fit <- as_cmdstan_fit(
+  dir_ls("Draws/", regex="across"),
+  check_diagnostics = TRUE,
+  format = getOption("cmdstanr_draws_format", NULL)
+)
+
+
 
 # Explore fit ----------------------------------------------------------
 
@@ -47,7 +55,11 @@ includepars <- c("b_log", "c_log","h_log", "K_log", "q", "r_log")
 includepars <- c("q", "q_temp","h_log", "h_temp")
 
 draws <- fit$draws()
-bayesplot::mcmc_trace(draws, pars = includepars)
-bayesplot::mcmc_areas(draws, area_method = "equal height", pars = includepars)
-bayesplot::mcmc_pairs(draws, pars = includepars)
+bayesplot::mcmc_trace(draws, regex_pars = "_log")
+bayesplot::mcmc_areas(draws, area_method = "equal height", regex_pars = "sigma")
+bayesplot::mcmc_areas(draws, area_method = "equal height", regex_pars = "*_log")
+
+bayesplot::mcmc_areas(draws, area_method = "equal height", regex_pars = "sigma")
+
+bayesplot::mcmc_pairs(draws, regex_pars = "K_log")
 
