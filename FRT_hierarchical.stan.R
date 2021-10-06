@@ -11,8 +11,8 @@ library(cmdstanr)
 D <- read_csv(here("data/FRT_Dataset.csv"))
 
 ## returns a list with data structures as declared in "FRT.stan"
-getData <- function(D, temp = NA) {
-  if(!is.na(temp)) {
+getData <- function(D, temp = NULL) {
+  if(!is.null(temp)) {
     D <- dplyr::filter(D, Temperature == temp)
   }
   data <- list(
@@ -32,7 +32,7 @@ getData <- function(D, temp = NA) {
 model <- cmdstan_model("FRT_hierarchical.stan")
 n_chains <- 3
 # if(!dir.exists("Draws")) dir.create("Draws")
-fit <- model$sample(data = getData(D, temp = NA),
+fit <- model$sample(data = getData(D, temp = NULL),
                        init = replicate(n_chains, list(b_log = -4.106669, c_log = -5.600194, h_log = -3.531813, K_log = 7.901859, q = 0.867401, r_log = -0.994875), simplify = F), # sigma = 0.222916
                        iter_warmup = 300, iter_sampling = 500, chains = n_chains, parallel_chains = n_chains, output_dir = "Draws", output_basename = "fit_25", seed = 1)
 
@@ -43,7 +43,9 @@ fit <- model$sample(data = getData(D, temp = NA),
 
 fit$summary()
 
-includepars <- c("b_log", "c_log","h_log", "K_log", "K_log_temp", "q", "r_log")
+includepars <- c("b_log", "c_log","h_log", "K_log", "q", "r_log")
+includepars <- c("q", "q_temp","h_log", "h_temp")
+
 draws <- fit$draws()
 bayesplot::mcmc_trace(draws, pars = includepars)
 bayesplot::mcmc_areas(draws, area_method = "equal height", pars = includepars)
