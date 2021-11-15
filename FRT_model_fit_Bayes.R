@@ -226,7 +226,7 @@ FR25$temp <- 25
 FR_posterior <- bind_rows(FR15, FR20, FR25)
 
 library(ggplot2)
-ggplot(FR_posterior, aes(x=temp, y=h, group=as.factor(temp))) + 
+ggplot(FR_posterior, aes(x=temp, y=q, group=as.factor(temp))) + 
   geom_violin(trim=FALSE, fill="gray")+
   labs(title="Plot of q  by temp", x="temperature", y = "Estimate")+
   geom_boxplot(width=0.1)+

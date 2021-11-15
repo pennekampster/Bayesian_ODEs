@@ -35,21 +35,61 @@ getData <- function(D, temp = 25) {
 # Fit stan model ----------------------------------------------------------
 
 model <- cmdstan_model("FRT.stan")
+
 n_chains <- 3
+# if(!dir.exists("Draws")) dir.create("Draws")
+fit_15 <- model$sample(data = getData(D, temp = 15),
+                       init = replicate(n_chains, list(b_log = -4.106669, c_log = -5.600194, h_log = -3.531813, K_log = 7.901859, q = 0.867401, r_log = -0.994875), simplify = F), # sigma = 0.222916
+                       iter_warmup = 300, iter_sampling = 500, chains = n_chains, parallel_chains = n_chains, output_dir = "Draws", output_basename = "fit_15", seed = 1)
+
+# if(!dir.exists("Draws")) dir.create("Draws")
+fit_20 <- model$sample(data = getData(D, temp = 20),
+                       init = replicate(n_chains, list(b_log = -15.229665, c_log = -4.554020, h_log = -3.100683, K_log = 7.897008, q = 3.492671, r_log = 0.136438), simplify = F), # sigma = 0.222916
+                       iter_warmup = 300, iter_sampling = 500, chains = n_chains, parallel_chains = n_chains, output_dir = "Draws", output_basename = "fit_20", seed = 1)
+
 # if(!dir.exists("Draws")) dir.create("Draws")
 fit_25 <- model$sample(data = getData(D, temp = 25),
                        init = replicate(n_chains, list(b_log = 1.117, c_log = -4.60517, h_log = -6.907755, K_log = 8.477, q = -.56, r_log = 0.1897936), simplify = F), # sigma = 0.222916
                        iter_warmup = 300, iter_sampling = 500, chains = n_chains, parallel_chains = n_chains, output_dir = "Draws", output_basename = "fit_25", seed = 1)
 
-# fit_25$save_output_files(dir = "Draws", basename = "fit_25")
-# fit_25 <- cmdstanr::read_cmdstan_csv(fit_25$output_files())
+
+
+#fit_25$save_output_files(dir = "Draws", basename = "fit_25")
+#fit_25 <- cmdstanr::read_cmdstan_csv(fit_25$output_files())
 
 # Explore fit ----------------------------------------------------------
 
+fit_15$summary()
+fit_20$summary()
 fit_25$summary()
+
 includepars <- c("b_log", "c_log","h_log", "K_log", "q", "r_log")
-draws_25 <- fit_25$draws()
 bayesplot::mcmc_trace(draws_25, pars = includepars)
 bayesplot::mcmc_areas(draws_25, area_method = "equal height", pars = includepars)
 bayesplot::mcmc_pairs(draws_25, pars = includepars)
+
+draws_15 <- fit_15$draws()
+fit15_draws <- as_draws_df(draws_15)
+fit15_draws$temp <- 15
+
+draws_20 <- fit_20$draws()
+fit20_draws <- as_draws_df(draws_20)
+fit20_draws$temp <- 20
+
+draws_25 <- fit_25$draws()
+fit25_draws <- as_draws_df(draws_25)
+fit25_draws$temp <- 25
+
+FR_posterior_stan <- bind_rows(fit15_draws, fit20_draws, fit25_draws)
+
+library(ggplot2)
+ggplot(FR_posterior_stan, aes(x=temp, y=q, group=as.factor(temp))) + 
+  geom_violin(trim=FALSE, fill="gray")+
+  labs(title="Plot of q  by temp", x="temperature", y = "Estimate")+
+  geom_boxplot(width=0.1)+
+  theme_classic()
+
+
+
+
 
