@@ -66,25 +66,25 @@ nll.odeint.general.pred(x)
 
 #bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
 bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
-iter = 1000
-settings <- list(iterations = iter, nrChains = 3,  message = FALSE)
-out <- runMCMC(bayesianSetup = bayesianSetup, sampler = "DEzs", settings = settings)
+iter = 50000
+settings <- list(iterations = iter, message = FALSE)
+out_15 <- runMCMC(bayesianSetup = bayesianSetup, sampler = "DEzs", settings = settings)
 
 # alternativer samples
-settings <- list(iterations = iter, adapt = T, DRlevels = 2, gibbsProbabilities = NULL, temperingFunction = NULL, optimize = T,  message = FALSE)
-out <- runMCMC(bayesianSetup = bayesianSetup, sampler = "Metropolis", settings = settings)
+# settings <- list(iterations = iter, adapt = T, DRlevels = 2, gibbsProbabilities = NULL, temperingFunction = NULL, optimize = T,  message = FALSE)
+# out <- runMCMC(bayesianSetup = bayesianSetup, sampler = "Metropolis", settings = settings)
 
 # create prior from successful previous run
-newPrior = createPriorDensity(out, method = "multivariate",
-                              eps = 1e-10, lower = refPars$lower,
-                              upper = refPars$upper, best = refPars$best)
-
-#bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
-bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
-iter = 10000
-settings = list(iterations = iter, message = F)
-
-out_15 <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
+# newPrior = createPriorDensity(out, method = "multivariate",
+#                               eps = 1e-10, lower = refPars$lower,
+#                               upper = refPars$upper, best = refPars$best)
+# 
+# #bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
+# bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
+# iter = 10000
+# settings = list(iterations = iter, message = F)
+# 
+# out_15 <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
 
 ## Not run: 
 plot(out_15)
@@ -102,18 +102,18 @@ FRT_Dataset <- FRT_Dataset_20
 
 # OK, the idea is to re-start the first sampler with a better guess of where the final posterior area is. 
 
-x = getSample(out, start = 100)
-# because of the low sample size, I don't trust the correlations, will thus only look at means and the range, and use this as new values for the sampler
-
-meansPost = apply(x, 2, mean)
-sdPost = apply(x, 2, sd)
-rangePost = apply(x, 2, range)
-
-newZ = matrix(runif(7000, rangePost[1,], rangePost[2,]), ncol = 7, byrow = T)
-
-settings = list(Z = newZ, startValue =  x[(nrow(x)-2):nrow(x), ])
-out <- runMCMC(bayesianSetup = bayesianSetup,  sampler = "DEzs", settings = settings )
-plot(out)
+# x = getSample(out, start = 100)
+# # because of the low sample size, I don't trust the correlations, will thus only look at means and the range, and use this as new values for the sampler
+# 
+# meansPost = apply(x, 2, mean)
+# sdPost = apply(x, 2, sd)
+# rangePost = apply(x, 2, range)
+# 
+# newZ = matrix(runif(7000, rangePost[1,], rangePost[2,]), ncol = 7, byrow = T)
+# 
+# settings = list(Z = newZ, startValue =  x[(nrow(x)-2):nrow(x), ])
+# out <- runMCMC(bayesianSetup = bayesianSetup,  sampler = "DEzs", settings = settings )
+# plot(out)
 
 
 # refPars <- data.frame(best=c(-15.229665, -3.100683,  1.250667, 0.136438, 7.897008, -4.554020,  0.236063), 
@@ -133,22 +133,22 @@ prior <- createUniformPrior(lower = refPars$lower,
 
 #bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
 bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
-iter = 1000
-settings = list(iterations = iter, message = F)
-
-out <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
-
-# create prior from successful previous run
-newPrior = createPriorDensity(out, method = "multivariate",
-                              eps = 1e-10, lower = refPars$lower,
-                              upper = refPars$upper, best = refPars$best)
-
-#bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
-bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
-iter = 10000
+iter = 50000
 settings = list(iterations = iter, message = F)
 
 out_20 <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
+
+# # create prior from successful previous run
+# newPrior = createPriorDensity(out, method = "multivariate",
+#                               eps = 1e-10, lower = refPars$lower,
+#                               upper = refPars$upper, best = refPars$best)
+# 
+# #bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
+# bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
+# iter = 10000
+# settings = list(iterations = iter, message = F)
+# 
+# out_20 <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
 
 
 ## Not run: 
@@ -184,22 +184,22 @@ prior <- createUniformPrior(lower = refPars$lower,
 
 #bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
 bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
-iter = 10000
-settings = list(iterations = iter, message = F)
-
-out <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
-
-# create prior from successful previous run
-newPrior = createPriorDensity(out, method = "multivariate",
-                              eps = 1e-10, lower = refPars$lower,
-                              upper = refPars$upper, best = refPars$best)
-
-#bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
-bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
-iter = 10000
+iter = 50000
 settings = list(iterations = iter, message = F)
 
 out_25 <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
+
+# create prior from successful previous run
+# newPrior = createPriorDensity(out, method = "multivariate",
+#                               eps = 1e-10, lower = refPars$lower,
+#                               upper = refPars$upper, best = refPars$best)
+# 
+# #bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h.log", "q", "r.log", "K.log", "c.log", "sigma"))
+# bayesianSetup <- createBayesianSetup(nll.odeint.general.pred, prior=prior, names=c("b.log", "h", "q", "r", "K.log", "c", "sigma"))
+# iter = 10000
+# settings = list(iterations = iter, message = F)
+# 
+# out_25 <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
 
 ## Not run: 
 plot(out_25)
@@ -213,4 +213,22 @@ medians20 <- getSample(out_20) %>% as.data.frame %>% summarize_all(median)
 medians25 <- getSample(out_25) %>% as.data.frame %>% summarize_all(median)
 
 rbind(medians15, medians20, medians25) %>% mutate_at(vars(contains("log")), exp)
+
+save(out_15, out_20, out_25, file = here("MCMC_fits.RData"))
+
+FR15 <- as.data.frame(getSample(out_15))
+FR15$temp <- 15
+FR20 <- as.data.frame(getSample(out_20), temp=20)
+FR20$temp <- 20
+FR25 <- as.data.frame(getSample(out_25), temp=25)
+FR25$temp <- 25
+
+FR_posterior <- bind_rows(FR15, FR20, FR25)
+
+library(ggplot2)
+ggplot(FR_posterior, aes(x=temp, y=h, group=as.factor(temp))) + 
+  geom_violin(trim=FALSE, fill="gray")+
+  labs(title="Plot of q  by temp", x="temperature", y = "Estimate")+
+  geom_boxplot(width=0.1)+
+  theme_classic()
 
