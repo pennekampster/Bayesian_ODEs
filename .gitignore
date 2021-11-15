@@ -38,3 +38,8 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 .Rproj.user
+
+# Stan files
+Draws/*
+FRT
+FRT_hierarchical

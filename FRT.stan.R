@@ -20,7 +20,7 @@ D <- read_csv(here("data/FRT_Dataset.csv"))
 
 ## returns a list with data structures as declared in "FRT.stan"
 getData <- function(D, temp = 25) {
-  D <- dplyr::filter(D, Temperature == temp & Treatment == "predator")
+  D <- dplyr::filter(D, Temperature == temp)
   data <- list(
     N_series = nrow(D),
     time_end = as.matrix(D["Incubation_time"]), # expects array[N_series, 1]
@@ -38,8 +38,8 @@ model <- cmdstan_model("FRT.stan")
 n_chains <- 3
 # if(!dir.exists("Draws")) dir.create("Draws")
 fit_25 <- model$sample(data = getData(D, temp = 25),
-                       init = replicate(n_chains, list(b_log = -4.106669, c_log = -5.600194, h_log = -3.531813, K_log = 7.901859, q = 0.867401, r_log = -0.994875), simplify = F), # sigma = 0.222916
-                       iter_warmup = 300, iter_sampling = 300, chains = n_chains, parallel_chains = n_chains, output_dir = "Draws", output_basename = "fit_25", seed = 1)
+                       init = replicate(n_chains, list(b_log = 1.117, c_log = -4.60517, h_log = -6.907755, K_log = 8.477, q = -.56, r_log = 0.1897936), simplify = F), # sigma = 0.222916
+                       iter_warmup = 300, iter_sampling = 500, chains = n_chains, parallel_chains = n_chains, output_dir = "Draws", output_basename = "fit_25", seed = 1)
 
 # fit_25$save_output_files(dir = "Draws", basename = "fit_25")
 # fit_25 <- cmdstanr::read_cmdstan_csv(fit_25$output_files())
