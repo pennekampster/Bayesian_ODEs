@@ -64,15 +64,15 @@ eaten.odeint.general.pred = function(N0, b, h, q, r, K, c, Tt, P, steps=100){
   return(ret)}
 
 
-nll.odeint.general.pred = function(Ndead, N0, b.log, h, q, r, K.log, c, Tt, P, P.end, steps=100, sigma){
+nll.odeint.general.pred = function(Ndead, N0, b_log, h_log, q, r_log, K_log, c_log, Tt, P, P.end, steps=100, sigma){
   if(sigma <= 0) return(Inf)
   temp2 = eaten.odeint.general.pred(N0=N0,
-                                    b=exp(b.log),
-                                    h=h,
+                                    b=exp(b_log),
+                                    h=exp(h_log),
                                     q=q,
-                                    r=r,
-                                    K=exp(K.log),
-                                    c=c,
+                                    r=exp(r_log),
+                                    K=exp(K_log),
+                                    c=exp(c_log),
                                     Tt=Tt,
                                     P=P,
                                     steps=steps)

@@ -26,7 +26,7 @@ library(readr)
 library(bbmle)
 
 ############## DATA
-FRT_Dataset <- read_csv("FRT_Dataset.csv")
+FRT_Dataset <- read_csv(here("Data", "FRT_Dataset.csv"))
 FRT_Dataset_15 <- filter(FRT_Dataset, Temperature==15)
 FRT_Dataset_20 <- filter(FRT_Dataset, Temperature==20)
 FRT_Dataset_25 <- filter(FRT_Dataset, Temperature==25)
@@ -39,14 +39,14 @@ source("FRT_function.R")
 # | TEMPERATURE  15°C |
 
 fit.15 = mle2(minuslogl = nll.odeint.general.pred,
-              start = list(b.log = -4.106669,
-                           h = exp(-3.531813),
+              start = list(b_log = -4.106669,
+                           h_log = (-3.531813),
                            q = 0.867401,
-                           r = exp(-0.994875),
-                           K.log = 7.901859,
-                           c = exp(-5.600194),
+                           r_log = (-0.994875),
+                           K_log = 7.901859,
+                           c_log = (-5.600194),
                            sigma = 0.222916),
-              data = with(list(N0 = Prey_start_density,
+                           data = with(list(N0 = Prey_start_density,
                                Ndead = Prey_start_density - Prey_end_density,
                                P = Predator_start_density,
                                P.end = Predator_end_density,
@@ -58,12 +58,12 @@ summary(fit.15)
 # | TEMPERATURE  20°C |
 
 fit.20 = mle2(minuslogl = nll.odeint.general.pred,
-              start = list(b.log = -15.229665,
-                           h = exp(-3.100683), 
+              start = list(b_log = -15.229665,
+                           h_log = (-3.100683), 
                            q = 3.492671, 
-                           r = exp(0.136438),
-                           K.log = 7.897008, 
-                           c = exp(-4.554020), 
+                           r_log = (0.136438),
+                           K_log = 7.897008, 
+                           c_log = (-4.554020), 
                            sigma = 0.236063),
               data = with(list(N0 = Prey_start_density,
                                Ndead = Prey_start_density - Prey_end_density,
@@ -77,12 +77,12 @@ summary(fit.20)
 # | TEMPERATURE  25°C |
 
 fit.25 = mle2(minuslogl = nll.odeint.general.pred,
-              start = list(b.log = 1.116512, 
-                           h = exp(-6.987074),
+              start = list(b_log = 1.116512, 
+                           h_log = (-6.987074),
                            q=-0.569485,
-                           r = exp(0.189600),
-                           K.log = 8.476514,
-                           c = exp(-4.580168),
+                           r_log = (0.189600),
+                           K_log = 8.476514,
+                           c_log = (-4.580168),
                            sigma = 0.422386),
               data = with(list(N0 = Prey_start_density,
                                Ndead = Prey_start_density - Prey_end_density,

@@ -72,30 +72,30 @@ nll.odeint.general.pred = function(parms,
                                    P.end=FRT_Dataset$Predator_start_density, 
                                    steps=100){
   #if(sigma <= 0) return(Inf)
+temp2 = eaten.odeint.general.pred(N0=N0,
+                                  b=exp(parms[1]),
+                                  h=exp(parms[2]),
+                                  q=parms[3],
+                                  r=exp(parms[4]),
+                                  K=exp(parms[5]),
+                                  c=exp(parms[6]),
+                                  Tt=Tt,
+                                  P=P,
+                                  steps=steps)
+  
+  
+  
   # temp2 = eaten.odeint.general.pred(N0=N0,
   #                                   b=exp(parms[1]),
-  #                                   h=exp(parms[2]),
+  #                                   h=parms[2],
   #                                   q=parms[3],
-  #                                   r=exp(parms[4]),
+  #                                   r=parms[4],
   #                                   K=exp(parms[5]),
-  #                                   c=exp(parms[6]),
+  #                                   c=parms[6],
   #                                   Tt=Tt,
   #                                   P=P,
   #                                   steps=steps)
-  
-  
-  
-  temp2 = eaten.odeint.general.pred(N0=N0,
-                                    b=exp(parms[1]),
-                                    h=parms[2],
-                                    q=parms[3],
-                                    r=parms[4],
-                                    K=exp(parms[5]),
-                                    c=parms[6],
-                                    Tt=Tt,
-                                    P=P,
-                                    steps=steps)
-  
+  # 
   
   
   

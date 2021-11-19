@@ -37,7 +37,7 @@ fit <- model$sample(data = getData(D, temp = NULL),
                        iter_warmup = 300, iter_sampling = 500, chains = n_chains, parallel_chains = n_chains, output_dir = "Draws", output_basename = "fit__across_temp", seed = 1)
 
 # fit$save_output_files(dir = "Draws", basename = "fit_across_temp")
-fit <- cmdstanr::read_cmdstan_csv(dir_ls("Draws/", regex="across"))
+#fit <- cmdstanr::read_cmdstan_csv(fs::dir_ls(here("Draws/"), regex="across"))
 
 fit <- as_cmdstan_fit(
   dir_ls("Draws/", regex="across"),
@@ -62,12 +62,20 @@ fit$summary()
 includepars <- c("b_log", "c_log","h_log", "K_log", "q", "r_log")
 includepars <- c("q", "q_temp_raw[1]", "q_temp_raw[2]", "q_temp_raw[3]")
 
+str(draws)
+
+
 draws <- fit$draws()
-bayesplot::mcmc_trace(draws, regex_pars = "_log")
+bayesplot::mcmc_trace(draws,regex_pars = "_temp_raw")
 bayesplot::mcmc_areas(draws, area_method = "equal height", regex_pars = "sigma")
-bayesplot::mcmc_areas(draws, area_method = "equal height", regex_pars = "*_log")
+bayesplot::mcmc_areas(draws, area_method = "equal height", regex_pars = "_log")
 
 bayesplot::mcmc_areas(draws, area_method = "equal height", regex_pars = "sigma")
 
-bayesplot::mcmc_pairs(draws, regex_pars = "K_log")
+bayesplot::mcmc_pairs(draws, regex_pars = "_temp\\[3\\]")
+
+
+draws_across <- fit$draws()
+fit_draws <- as_draws_df(draws_across)
+
 

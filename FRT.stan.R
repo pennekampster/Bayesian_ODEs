@@ -55,7 +55,28 @@ fit_25 <- model$sample(data = getData(D, temp = 25),
 
 
 #fit_25$save_output_files(dir = "Draws", basename = "fit_25")
-#fit_25 <- cmdstanr::read_cmdstan_csv(fit_25$output_files())
+#fit_25 <- cmdstanr::read_cmdstan_csv(fs::dir_ls(here("Draws/"), regexp = "fit"))
+
+
+
+fit_15 <- as_cmdstan_fit(
+  fs::dir_ls("Draws/", regex="fit_15"),
+  check_diagnostics = TRUE,
+  format = getOption("cmdstanr_draws_format", NULL)
+)
+
+fit_20 <- as_cmdstan_fit(
+  fs::dir_ls("Draws/", regex="fit_20"),
+  check_diagnostics = TRUE,
+  format = getOption("cmdstanr_draws_format", NULL)
+)
+
+
+fit_25 <- as_cmdstan_fit(
+  fs::dir_ls("Draws/", regex="fit_25"),
+  check_diagnostics = TRUE,
+  format = getOption("cmdstanr_draws_format", NULL)
+)
 
 # Explore fit ----------------------------------------------------------
 
@@ -63,10 +84,6 @@ fit_15$summary()
 fit_20$summary()
 fit_25$summary()
 
-includepars <- c("b_log", "c_log","h_log", "K_log", "q", "r_log")
-bayesplot::mcmc_trace(draws_25, pars = includepars)
-bayesplot::mcmc_areas(draws_25, area_method = "equal height", pars = includepars)
-bayesplot::mcmc_pairs(draws_25, pars = includepars)
 
 draws_15 <- fit_15$draws()
 fit15_draws <- as_draws_df(draws_15)
@@ -81,9 +98,17 @@ fit25_draws <- as_draws_df(draws_25)
 fit25_draws$temp <- 25
 
 FR_posterior_stan <- bind_rows(fit15_draws, fit20_draws, fit25_draws)
+FR_posterior_stan$fit <- "Stan_by_temp" 
+
+
+includepars <- c("b_log", "c_log","h_log", "K_log", "q", "r_log")
+bayesplot::mcmc_trace(draws_25, pars = includepars)
+bayesplot::mcmc_areas(draws_25, area_method = "equal height", pars = includepars)
+bayesplot::mcmc_pairs(draws_25, pars = includepars)
+
 
 library(ggplot2)
-ggplot(FR_posterior_stan, aes(x=temp, y=q, group=as.factor(temp))) + 
+ggplot(FR_posterior_stan, aes(x=temp, y=(q), group=as.factor(temp))) + 
   geom_violin(trim=FALSE, fill="gray")+
   labs(title="Plot of q  by temp", x="temperature", y = "Estimate")+
   geom_boxplot(width=0.1)+

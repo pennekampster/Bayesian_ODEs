@@ -1,0 +1,133 @@
+---
+title: "Comparison of estimates"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(here)
+library(cmdstanr)
+library(ggplot2)
+library(BayesianTools)
+```
+
+Load data from ML estimation, Stan and the BayesianTools package:
+
+ML:
+
+```{r, warning=F}
+source("FRT_model_fit.R")
+```
+
+BT package:
+
+```{r}
+load(here("MCMC_fits.RData"))
+FR15 <- as.data.frame(getSample(out_15))
+FR15$temp <- 15
+FR20 <- as.data.frame(getSample(out_20), temp=20)
+FR20$temp <- 20
+FR25 <- as.data.frame(getSample(out_25), temp=25)
+FR25$temp <- 25
+
+FR_posterior <- bind_rows(FR15, FR20, FR25)
+FR_posterior$fit <- "BT_by_temp"
+```
+
+
+Stan by temperature:
+
+```{r}
+fit_15 <- as_cmdstan_fit(
+  fs::dir_ls("Draws/", regex="fit_15"),
+  check_diagnostics = TRUE,
+  format = getOption("cmdstanr_draws_format", NULL)
+)
+
+fit_20 <- as_cmdstan_fit(
+  fs::dir_ls("Draws/", regex="fit_20"),
+  check_diagnostics = TRUE,
+  format = getOption("cmdstanr_draws_format", NULL)
+)
+
+
+fit_25 <- as_cmdstan_fit(
+  fs::dir_ls("Draws/", regex="fit_25"),
+  check_diagnostics = TRUE,
+  format = getOption("cmdstanr_draws_format", NULL)
+)
+
+draws_15 <- fit_15$draws()
+fit15_draws <- as_draws_df(draws_15)
+fit15_draws$temp <- 15
+
+draws_20 <- fit_20$draws()
+fit20_draws <- as_draws_df(draws_20)
+fit20_draws$temp <- 20
+
+draws_25 <- fit_25$draws()
+fit25_draws <- as_draws_df(draws_25)
+fit25_draws$temp <- 25
+
+FR_posterior_stan <- bind_rows(fit15_draws, fit20_draws, fit25_draws)
+FR_posterior_stan$fit <- "Stan_by_temp" 
+```
+
+
+Stan hierarchical fit:
+
+```{r}
+fit <- as_cmdstan_fit(
+  fs::dir_ls("Draws/", regex="across"),
+  check_diagnostics = TRUE,
+  format = getOption("cmdstanr_draws_format", NULL)
+)
+
+draws_across <- fit$draws()
+fit_draws <- as_draws_df(draws_across)
+
+out <- fit_draws %>% select(contains("_temp")) %>% 
+  pivot_longer(cols = 19:36, values_to = "Estimate", names_to = "par") %>%
+  mutate(
+    temp = case_when(
+    grepl("[1]", par) ~ 15,
+    grepl("[2]", par) ~ 20,
+    grepl("[3]", par) ~ 25),
+    par = gsub("\\[[1-3]]", "" , par),
+    fit = "Stan_across_temp"
+    )
+```
+
+
+
+```{r}
+pars_list <- list("b_log", "h_log", "q", "r_log", "K_log", "c_log")
+
+pdf("Estimate_comparison.pdf", width=20, height=13)
+for (i in pars_list){
+
+pars <- i
+
+out0 <-  FR_posterior %>% select(!!(pars), temp, fit)
+out1 <-  FR_posterior_stan %>% select(!!(pars), temp, fit)
+out2 <- out %>% filter(par == paste0(pars, "_temp")) %>% rename(!!(pars) := Estimate) %>% select(!!(pars), temp, fit)
+
+out3 <-  bind_rows(out0, out1, out2)
+
+ML <- data.frame(q_ML=c(coef(fit.15)[[pars]], coef(fit.20)[[pars]], coef(fit.25)[[pars]]), temp = c(15,20,25))
+
+
+library(ggplot2)
+print(
+  ggplot() + 
+  geom_violin(data=out3, aes(x=fit, y=eval(parse(text=pars)), group = fit), trim=FALSE, fill="gray")+
+  geom_boxplot(data=out3, aes(x=fit, y=eval(parse(text=pars)), group = fit), width=0.1)+
+  labs(title=paste0("Plot of ", pars, " by temp"), x="temperature", y = "Estimate") +  
+  geom_hline(data=ML, aes(yintercept=q_ML)) + 
+  geom_hline(yintercept=0, colour="red", linetype="dashed") + 
+  theme_classic() + facet_grid(.~temp)
+)
+}
+dev.off()
+```
+
